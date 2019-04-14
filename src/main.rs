@@ -22,7 +22,7 @@ struct Player {
 fn paint_screen(mut player: Player) {
 
     let imgx = 800;
-    let imgy = 800;
+    let imgy = 600;
 
     let scalex = 3.0 / imgx as f32;
     let scaley = 3.0 / imgy as f32;
@@ -57,16 +57,16 @@ fn paint_screen(mut player: Player) {
         player.y = 1.0
     }
 
-    if player.x < render_map.len() as f32 - 2.0 {
+    if player.x > render_map.len() as f32 - 2.0 {
         player.x = render_map.len() as f32 - 2.0
     }
 
-    if player.y < render_map[player.x as usize].len() as f32 - 2.0 {
+    if player.y > render_map[player.x as usize].len() as f32 - 2.0 {
         player.y = render_map[player.x as usize].len() as f32 - 2.0
     }
 
     // TODO: нужна оптимизация
-    if render_map[player.x as usize].chars().nth(player.y as usize).unwrap() == ' ' {
+    if render_map[player.x as usize].chars().nth(player.y as usize).unwrap() != ' ' {
         player.x = player.prev_x;
         player.y = player.prev_y;
         return
