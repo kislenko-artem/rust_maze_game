@@ -24,11 +24,8 @@ struct Player {
 
 fn paint_screen(mut player: Player) {
 
-    let imgx = 800;
-    let imgy = 600;
-
-    let scalex = 3.0 / imgx as f32;
-    let scaley = 3.0 / imgy as f32;
+    let imgx = W_WIDTH as u32;
+    let imgy = W_HEIGHT as u32;
 
     let img_textures = image::open("/home/artem/projects/golang/game/assets/textures.png").unwrap();
 
@@ -83,11 +80,11 @@ fn paint_screen(mut player: Player) {
         let mut x_wall: f32 = 0.0;
         let mut y_wall: f32 = 0.0;
 
-        let angle = player.a - FOV/2.0 + x as f32 / W_WIDTH as f32;
-        for i in 0..MAX_VIZIBILITY {
+        let angle = player.a - FOV/2.0 + FOV * x as f32 / W_WIDTH as f32;
+        for i in 0..MAX_VIZIBILITY+1 {
             c = i as f32 * 0.01;
-            x_wall = player.x + c*angle.cos();
-            y_wall = player.y + c*angle.sin();
+            x_wall = player.x + c*angle.sin();
+            y_wall = player.y + c*angle.cos();
 
             map_sign = render_map[x_wall as usize].chars().nth(y_wall as usize).unwrap();
             if map_sign != ' ' {
@@ -98,7 +95,7 @@ fn paint_screen(mut player: Player) {
             continue
         }
 
-        let mut size_y:i32 = (W_HEIGHT as f32 / (c*(angle-player.a).cos()) + (W_HEIGHT/5) as f32) as i32;
+        let mut size_y:i32 = (W_HEIGHT as f32 / (c*(angle-player.a).cos())) as i32 + (W_HEIGHT/5) as i32;
         if size_y > W_HEIGHT {
             size_y = W_HEIGHT
         }
@@ -120,13 +117,14 @@ fn paint_screen(mut player: Player) {
             if x_pic == 0 || x_pic == TEXTURE_SIZE - 1 {
                 x_pic = ((y_wall - y_wall as i32 as f32) * TEXTURE_SIZE as f32) as i32;
             } else {
-                y_pic = y as i32 - (W_HEIGHT - (size_y + OFFSET_TOP)) * TEXTURE_SIZE / (size_y - OFFSET_BOTTOM - (W_HEIGHT - (size_y + OFFSET_TOP)))
-            }
-            if y_pic > 63 {
-                y_pic = 63;
+                y_pic = (y as i32 - (W_HEIGHT - (size_y + OFFSET_TOP))) * TEXTURE_SIZE / (size_y - OFFSET_BOTTOM - (W_HEIGHT - (size_y + OFFSET_TOP)))
             }
             let mut koef:i32 = map_sign.to_digit(RADIX).unwrap() as i32;
             koef = koef * TEXTURE_SIZE;
+            if y_pic == 64 {
+                y_pic = 63
+            }
+
             let color_rgba = img_textures.get_pixel((x_pic + koef) as u32, y_pic as u32);
             *pixel = image::Rgb([color_rgba[0], color_rgba[1], color_rgba[2]]);
         }
@@ -138,7 +136,7 @@ fn paint_screen(mut player: Player) {
 
 fn main() {
     let now = Instant::now();
-    let mut p:Player = Player{x: 2.0, y: 2.0, a: 0.0, prev_y: 0.0, prev_x: 0.0};
+    let p:Player = Player{x: 2.0, y: 2.0, a: 0.0, prev_y: 0.0, prev_x: 0.0};
     paint_screen(p);
     let new_now = Instant::now();
     println!("{:?}", new_now.duration_since(now));
